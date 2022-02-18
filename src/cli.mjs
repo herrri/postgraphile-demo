@@ -5,11 +5,10 @@ import { Command } from 'commander';
 const KEYS_FILE = './src/keys.json';
 
 const generateKeys = async () => {
-  const keyStore = jose.JWK.createKeyStore()
-  await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' })
-  fs.writeFileSync(KEYS_FILE, JSON.stringify(keyStore.toJSON(true), null, '  ')
-  );
-}
+  const keyStore = jose.JWK.createKeyStore();
+  await keyStore.generate('RSA', 2048, { alg: 'RS256', use: 'sig' });
+  fs.writeFileSync(KEYS_FILE, JSON.stringify(keyStore.toJSON(true), null, '  '));
+};
 
 const generateToken = async () => {
   const ks = fs.readFileSync(KEYS_FILE);
@@ -31,13 +30,13 @@ const generateToken = async () => {
     .update(payload)
     .final();
   console.log(token);
-}
+};
 
 const getJwks = async () => {
-  const ks = fs.readFileSync(KEYS_FILE)
-  const keyStore = await jose.JWK.asKeyStore(ks.toString())
+  const ks = fs.readFileSync(KEYS_FILE);
+  const keyStore = await jose.JWK.asKeyStore(ks.toString());
   console.log(keyStore.toJSON());
-}
+};
 
 const exportKeys = async () => {
   const ks = fs.readFileSync(KEYS_FILE);
@@ -45,7 +44,7 @@ const exportKeys = async () => {
   const [key] = keyStore.all({ use: 'sig' });
   console.log(key.toPEM());
   console.log(key.toPEM(true));
-}
+};
 
 const program = new Command();
 program.description('Util for generating keys and tokens');
