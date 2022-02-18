@@ -22,10 +22,11 @@ app.use(async (req, res, next) => {
   const keyStore = await jose.JWK.asKeyStore(ks.toString());
   const [key] = keyStore.all();
   try {
-    const decoded = jwt.verify(token, jwkToPem(key.toJSON()), {algorithms: ['RS256']});
+    const decoded = jwt.verify(token,
+      jwkToPem(key.toJSON()), { algorithms: ['RS256'] });
     console.log(decoded);
     next();
-  } catch(err) {
+  } catch (err) {
     return res.status(401).send();
   }
 });
@@ -53,21 +54,21 @@ const ready = async () => {
 }
 
 app.get('/live', (req, res) => {
-  return res.status(200).json({status: 'OK'});
+  return res.status(200).json({ status: 'OK' });
 });
 
 app.get('/ready', async (req, res) => {
-  if(!ready()) {
-    return res.status(500).json({status: 'NOT OK'})
+  if (!ready()) {
+    return res.status(500).json({ status: 'NOT OK' })
   }
-  return res.status(200).json({status: 'OK'});
+  return res.status(200).json({ status: 'OK' });
 });
 
 app.get('/health', async (req, res) => {
-  if(!ready()) {
-    return res.status(500).json({status: 'NOT OK'})
+  if (!ready()) {
+    return res.status(500).json({ status: 'NOT OK' })
   }
-  return res.status(200).json({status: 'OK'});
+  return res.status(200).json({ status: 'OK' });
 });
 
 
