@@ -2,7 +2,7 @@ CREATE TABLE "votes" (
   "id" int PRIMARY KEY,
   "user" int,
   "created_by" int,
-  "created_at" datetime
+  "created_at" timestamp
 );
 
 CREATE TABLE "users" (
@@ -10,8 +10,8 @@ CREATE TABLE "users" (
   "first_name" varchar,
   "last_name" varchar,
   "email" varchar,
-  "created_at" datetime,
-  "updated_at" datetime
+  "created_at" timestamp,
+  "updated_at" timestamp
 );
 
 ALTER TABLE "votes" ADD FOREIGN KEY ("user") REFERENCES "users" ("id");

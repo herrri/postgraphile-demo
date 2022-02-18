@@ -1,9 +1,34 @@
 import express from "express";
+import fs from "fs";
 import { postgraphile } from "postgraphile";
-import { Client } from "pg";
+import pg from "pg";
+import jose from 'node-jose';
+import jwt from 'jsonwebtoken';
+import jwkToPem from 'jwk-to-pem';
+
+
+const { Client } = pg;
+
+
+const KEYS_FILE = 'src/keys.json'
 
 const app = express();
 const DATABASE_URL = process.env.DATABASE_URL || "postgres://user:password@postgres:5432/db";
+;
+
+app.use(async (req, res, next) => {
+  const token = req.headers.authorization.replace('Bearer ', '');
+  const ks = fs.readFileSync(KEYS_FILE);
+  const keyStore = await jose.JWK.asKeyStore(ks.toString());
+  const [key] = keyStore.all();
+  try {
+    const decoded = jwt.verify(token, jwkToPem(key.toJSON()), {algorithms: ['RS256']});
+    console.log(decoded);
+    next();
+  } catch(err) {
+    return res.status(401).send();
+  }
+});
 
 app.use(
   postgraphile(

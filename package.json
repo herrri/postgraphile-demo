@@ -4,8 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon --inspect=0.0.0.0:9229 --watch src/** -r esm src/index.js",
-    "start": "node -r esm src/index.js",
+    "dev": "nodemon --inspect=0.0.0.0:9229 --watch src src/index.mjs",
+    "start": "node src/index.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
     "jwt": "node src/cli.mjs"
   },
@@ -15,7 +15,9 @@
     "commander": "^9.0.0",
     "esm": "^3.2.25",
     "express": "^4.17.2",
+    "express-jwt": "^6.1.0",
     "jsonwebtoken": "^8.5.1",
+    "jwk-to-pem": "^2.0.5",
     "node-jose": "^2.1.0",
     "postgraphile": "^4.12.8",
     "yarn": "^1.22.17"
