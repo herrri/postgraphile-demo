@@ -19,6 +19,7 @@
     "jsonwebtoken": "^8.5.1",
     "jwk-to-pem": "^2.0.5",
     "node-jose": "^2.1.0",
+    "pg": "^8.7.3",
     "postgraphile": "^4.12.8",
     "yarn": "^1.22.17"
   },
@@ -26,6 +27,7 @@
     "eslint": "^8.9.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-json": "^3.1.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.3.4",
     "nodemon": "^2.0.15",
@@ -37,6 +39,9 @@
     }
   },
   "lint-staged": {
-    "*.js": ["./node_modules/.bin/eslint — fix", "git add"]
+    "*.js": [
+      "./node_modules/.bin/eslint — fix",
+      "git add"
+    ]
   }
 }
