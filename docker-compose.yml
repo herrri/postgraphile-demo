@@ -2,7 +2,7 @@ version: "3.9"
 services:
   postgres:
     image: postgres
-    environment:
+    environment: &postgres-env-vars
       POSTGRES_DB: ${POSTGRES_DB:-db}
       POSTGRES_USER: ${POSTGRES_USER:-root}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
@@ -20,6 +20,7 @@ services:
   postgraphile:
     build: .
     command: yarn dev:graphql
+    environment: *postgres-env-vars
     volumes:
       - ./src:/app/src
       - ./package.json:/app/package.json
