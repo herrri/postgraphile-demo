@@ -10,11 +10,9 @@ const generateKeys = async () => {
   fs.writeFileSync(KEYS_FILE, JSON.stringify(keyStore.toJSON(true), null, "  "));
 };
 
-const generateToken = async () => {
+const generateToken = async (opts) => {
   const ks = fs.readFileSync(KEYS_FILE);
-  console.log(ks.toString());
   const keyStore = await jose.JWK.asKeyStore(ks.toString());
-  console.log(keyStore.toJSON());
   const [key] = keyStore.all({ use: "sig" });
 
   const opt = { compact: true, jwk: key, fields: { typ: "jwt" } };
@@ -23,7 +21,8 @@ const generateToken = async () => {
   const payload = JSON.stringify({
     exp: Math.floor(exp.setDate(exp.getDate() + 1) / 1000),
     iat: Math.floor(iat / 1000),
-    sub: "test",
+    sub: opts.sub || null,
+    role: opts.role || "anonymous",
   });
 
   const token = await jose.JWS.createSign(opt, key)
@@ -38,26 +37,36 @@ const getJwks = async () => {
   console.log(keyStore.toJSON());
 };
 
-const exportKeys = async () => {
+const exportKeys = async (opts) => {
   const ks = fs.readFileSync(KEYS_FILE);
   const keyStore = await jose.JWK.asKeyStore(ks.toString());
   const [key] = keyStore.all({ use: "sig" });
-  console.log(key.toPEM());
-  console.log(key.toPEM(true));
+  if (opts.cert === "public" || opts.cert === "both") {
+    console.log(key.toPEM());
+  }
+  if (opts.cert === "private" || opts.cert === "both") {
+    console.log(key.toPEM(true));
+  }
 };
 
 const program = new Command();
-program.description("Util for generating keys and tokens");
-program.command("generatekeys").description("generate keys").action(async () => {
+program.description("JWT util");
+program.command("generate-keys").description("generate RSA-keypair").action(async () => {
   await generateKeys();
 });
-program.command("generatetoken").description("generate signed dummy jwt-token").action(async () => {
-  await generateToken();
-});
-program.command("getjwks").description("get JWKS").action(async () => {
+program.command("generate-jwt").option("--role [name]").option("--sub [id]", "integer argument", parseInt).description("generate dummy jwt-token")
+  .action(async (opts) => {
+    await generateToken(opts);
+  });
+program.command("generate-jwks").description("ouputs a JSON jwks").action(async () => {
   await getJwks();
 });
-program.command("exportkeys").description("output public and private keys").action(async () => {
-  await exportKeys();
-});
+program.command("export-certs").option("--cert [public|private|both]", "cert to export", "public").description("output public and private keys")
+  .action(async (opts) => {
+    const valid = ["public", "private", "both"].includes(opts.cert);
+    if (!valid) {
+      console.error("Invalid option. Valid options are [public|private|both]");
+    }
+    await exportKeys(opts);
+  });
 program.parse();

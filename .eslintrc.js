@@ -15,6 +15,6 @@ module.exports = {
     "no-console": "off",
   },
   plugins: [
-    "json"
+    "json",
   ],
 };

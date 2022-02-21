@@ -1,11 +1,22 @@
 {
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Docker: Attach to Node",
+            "name": "Docker: Attach to Postgraphile",
             "type": "node",
             "request": "attach",
             "port": 9229,
+            "address": "localhost",
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/app",
+            "protocol": "inspector"
+        },
+        {
+            "name": "Docker: Attach to Auth",
+            "type": "node",
+            "request": "attach",
+            "port": 9230,
             "address": "localhost",
             "localRoot": "${workspaceFolder}",
             "remoteRoot": "/app",

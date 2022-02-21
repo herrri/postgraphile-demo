@@ -1,13 +1,15 @@
 {
   "name": "postgraphile-demo",
   "version": "0.0.1",
-  "description": "",
+  "description": "A postgraphile demo",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon --inspect=0.0.0.0:9229 --watch src src/index.mjs",
-    "start": "node src/index.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "jwt": "node src/cli.mjs"
+    "dev:graphql": "nodemon --inspect=0.0.0.0:9229 --watch src src/graphql/index.mjs",
+    "dev:auth": "nodemon --inspect=0.0.0.0:9229 --watch src src/auth/index.mjs",
+    "start:graphql": "node src/graphql/index.mjs",
+    "start:auth": "node src/auth/index.mjs",
+    "cli:auth": "node src/auth/cli.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
@@ -17,7 +19,7 @@
     "express": "^4.17.2",
     "express-jwt": "^6.1.0",
     "jsonwebtoken": "^8.5.1",
-    "jwk-to-pem": "^2.0.5",
+    "jwks-rsa": "^2.0.5",
     "node-jose": "^2.1.0",
     "pg": "^8.7.3",
     "postgraphile": "^4.12.8",
