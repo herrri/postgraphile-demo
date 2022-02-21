@@ -5,7 +5,8 @@ import jwt from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
 import health from "@cloudnative/health-connect";
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgres://root:password@postgres:5432/db";
+const DATABASE_URL =
+  process.env.DATABASE_URL || "postgres://root:password@postgres:5432/db";
 const AUDIENCE = "my_app";
 
 const { Client } = pg;
@@ -31,11 +32,10 @@ app.use("/graphql", async (req, res, next) => {
 
     const token = authorization.replace("Bearer ", "");
     const key = await jwksClientInstance.getSigningKey();
-    const decoded = jwt.verify(
-      token,
-      key.getPublicKey(),
-      { algorithms: ["RS256"], audience: AUDIENCE },
-    );
+    const decoded = jwt.verify(token, key.getPublicKey(), {
+      algorithms: ["RS256"],
+      audience: AUDIENCE,
+    });
     const { sub, role } = decoded;
     req.user = { sub, role };
   } catch (err) {
@@ -46,25 +46,21 @@ app.use("/graphql", async (req, res, next) => {
 });
 
 app.use(
-  postgraphile(
-    DATABASE_URL,
-    "public",
-    {
-      watchPg: true,
-      graphiql: true,
-      enhanceGraphiql: true,
-      simpleCollections: "both",
-      pgSettings: (req) => {
-        console.log(req.user);
-        const settings = {};
-        if (req.user) {
-          settings.role = req.user.role;
-          settings["jwt.claims.user_id"] = req.user.sub;
-        }
-        return settings;
-      },
+  postgraphile(DATABASE_URL, "public", {
+    watchPg: true,
+    graphiql: true,
+    enhanceGraphiql: true,
+    simpleCollections: "both",
+    pgSettings: (req) => {
+      console.log(req.user);
+      const settings = {};
+      if (req.user) {
+        settings.role = req.user.role;
+        settings["jwt.claims.user_id"] = req.user.sub;
+      }
+      return settings;
     },
-  ),
+  }),
 );
 
 healthcheck.registerLivenessCheck(async (resolve, _reject) => {

@@ -7,7 +7,10 @@ const KEYS_FILE = "./src/keys.json";
 const generateKeys = async () => {
   const keyStore = jose.JWK.createKeyStore();
   await keyStore.generate("RSA", 2048, { alg: "RS256", use: "sig" });
-  fs.writeFileSync(KEYS_FILE, JSON.stringify(keyStore.toJSON(true), null, "  "));
+  fs.writeFileSync(
+    KEYS_FILE,
+    JSON.stringify(keyStore.toJSON(true), null, "  "),
+  );
 };
 
 const generateToken = async (opts) => {
@@ -26,9 +29,7 @@ const generateToken = async (opts) => {
     aud: opts.aud || ["my_app"],
   });
 
-  const token = await jose.JWS.createSign(opt, key)
-    .update(payload)
-    .final();
+  const token = await jose.JWS.createSign(opt, key).update(payload).final();
   console.log(token);
 };
 
@@ -52,21 +53,33 @@ const exportKeys = async (opts) => {
 
 const program = new Command();
 program.description("JWT util");
-program.command("generate-keys").description("generate RSA-keypair").action(async () => {
-  await generateKeys();
-});
-program.command("generate-jwt")
+program
+  .command("generate-keys")
+  .description("generate RSA-keypair")
+  .action(async () => {
+    await generateKeys();
+  });
+program
+  .command("generate-jwt")
   .option("--role [name]")
   .option("--sub [id]", "integer argument", parseInt)
-  .option("--aud [value]", "audiences in separated by comma", (arg) => arg.split(","))
+  .option("--aud [value]", "audiences in separated by comma", (arg) =>
+    arg.split(","),
+  )
   .description("generate dummy jwt-token")
   .action(async (opts) => {
     await generateToken(opts);
   });
-program.command("generate-jwks").description("ouputs a JSON jwks").action(async () => {
-  await getJwks();
-});
-program.command("export-certs").option("--cert [public|private|both]", "cert to export", "public").description("output public and private keys")
+program
+  .command("generate-jwks")
+  .description("ouputs a JSON jwks")
+  .action(async () => {
+    await getJwks();
+  });
+program
+  .command("export-certs")
+  .option("--cert [public|private|both]", "cert to export", "public")
+  .description("output public and private keys")
   .action(async (opts) => {
     const valid = ["public", "private", "both"].includes(opts.cert);
     if (!valid) {
