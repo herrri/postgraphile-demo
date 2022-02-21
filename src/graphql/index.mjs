@@ -6,7 +6,8 @@ import jwksClient from "jwks-rsa";
 import health from "@cloudnative/health-connect";
 
 const DATABASE_URL =
-  process.env.DATABASE_URL || "postgres://root:password@postgres:5432/db";
+  process.env.DATABASE_URL ||
+  `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@postgres:5432/${process.env.POSTGRES_DB}`;
 const AUDIENCE = "my_app";
 
 const { Client } = pg;
