@@ -39,3 +39,41 @@ GRANT SELECT ON public.public_scores TO "user";
 GRANT USAGE, SELECT ON SEQUENCE scores_id_seq TO "user";
 
 GRANT SELECT ON public.public_scores TO "anonymous";
+
+CREATE FUNCTION current_user_id() RETURNS INTEGER AS $$ 
+SELECT 
+  nullif(
+    current_setting('jwt.claims.user_id', true), 
+    ''
+  ):: INTEGER;
+$$ LANGUAGE SQL stable;
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.scores ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY pol_users_admin
+  ON users TO admin
+  USING (true);
+
+CREATE POLICY pol_scores_admin
+  ON scores TO admin
+  USING (true);
+
+CREATE POLICY pol_users_user
+  ON users TO "user"
+  USING (
+    id = current_user_id()
+  );
+
+CREATE POLICY pol_scores_user
+  ON public.scores TO "user"
+  for SELECT, 
+  USING (
+    user_id = current_user_id()
+  );
+
+CREATE FUNCTION my_create_score(score int) RETURNS public.scores AS $$
+  INSERT INTO public.scores (score, user_id, created_at, updated_at) VALUES ($1, current_user_id(), NOW(), NOW()) RETURNING *;
+$$ LANGUAGE sql VOLATILE STRICT SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION my_create_score TO "user";

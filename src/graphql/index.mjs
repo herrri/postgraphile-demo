@@ -36,10 +36,10 @@ app.use("/graphql", async (req, res, next) => {
       key.getPublicKey(),
       { algorithms: ["RS256"], audience: AUDIENCE },
     );
-    // magic
     const { sub, role } = decoded;
     req.user = { sub, role };
   } catch (err) {
+    // req.user = { sub: null, role: "anonymous" };
     return res.status(401).json({ err: err.message });
   }
   return next();
@@ -54,13 +54,12 @@ app.use(
       graphiql: true,
       enhanceGraphiql: true,
       simpleCollections: "both",
-      // magic
       pgSettings: (req) => {
         console.log(req.user);
         const settings = {};
         if (req.user) {
           settings.role = req.user.role;
-          settings.sub = req.user.sub;
+          settings["jwt.claims.user_id"] = req.user.sub;
         }
         return settings;
       },
