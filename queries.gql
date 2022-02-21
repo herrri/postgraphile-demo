@@ -1,0 +1,49 @@
+
+query {
+  allUsers {
+    nodes {
+      id
+    }
+  }
+}
+
+mutation {
+  createUser(
+    input: { user: { username: "bilbo", email: "baggins@example.com" } }
+  ) {
+    user {
+      id
+    }
+  }
+}
+
+mutation {
+  myCreateScore(
+    input: { score: 30 }
+  ) {
+    score {
+			score
+		}
+  }
+}
+
+query {
+	allPublicScores {
+		nodes {
+			username
+			score
+		}
+	}
+}
+
+
+query {
+	allScores {
+		nodes {
+			score
+			userByUserId {
+				username
+			}
+		}
+	}
+}
