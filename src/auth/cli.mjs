@@ -23,6 +23,7 @@ const generateToken = async (opts) => {
     iat: Math.floor(iat / 1000),
     sub: opts.sub || null,
     role: opts.role || "anonymous",
+    aud: opts.aud || ["my_app"],
   });
 
   const token = await jose.JWS.createSign(opt, key)
@@ -54,7 +55,11 @@ program.description("JWT util");
 program.command("generate-keys").description("generate RSA-keypair").action(async () => {
   await generateKeys();
 });
-program.command("generate-jwt").option("--role [name]").option("--sub [id]", "integer argument", parseInt).description("generate dummy jwt-token")
+program.command("generate-jwt")
+  .option("--role [name]")
+  .option("--sub [id]", "integer argument", parseInt)
+  .option("--aud [value]", "audiences in separated by comma", (arg) => arg.split(","))
+  .description("generate dummy jwt-token")
   .action(async (opts) => {
     await generateToken(opts);
   });

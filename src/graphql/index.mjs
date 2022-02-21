@@ -15,6 +15,7 @@ const jwksClientInstance = jwksClient({
 
 const app = express();
 const DATABASE_URL = process.env.DATABASE_URL || "postgres://root:password@postgres:5432/db";
+const AUDIENCE = "my_app";
 
 // validate JWTs
 app.use("/graphql", async (req, res, next) => {
@@ -24,7 +25,7 @@ app.use("/graphql", async (req, res, next) => {
     const decoded = jwt.verify(
       token,
       key.getPublicKey(),
-      { algorithms: ["RS256"] },
+      { algorithms: ["RS256"], audience: AUDIENCE },
     );
     // magic
     const { sub, role } = decoded;

@@ -10,3 +10,7 @@ SELECT grantee, privilege_type
 FROM information_schema.role_table_grants 
 WHERE table_name='public.users';
 ```
+
+https://learn.graphile.org/docs/PostgreSQL_Row_Level_Security_Infosheet.pdf
+
+https://www.graphile.org/postgraphile/community-plugins/
