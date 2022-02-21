@@ -14,6 +14,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@cloudnative/health-connect": "^2.1.0",
     "commander": "^9.0.0",
     "esm": "^3.2.25",
     "express": "^4.17.2",

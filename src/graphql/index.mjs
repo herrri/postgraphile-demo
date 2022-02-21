@@ -3,25 +3,34 @@ import { postgraphile } from "postgraphile";
 import pg from "pg";
 import jwt from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
+import health from "@cloudnative/health-connect";
+
+const DATABASE_URL = process.env.DATABASE_URL || "postgres://root:password@postgres:5432/db";
+const AUDIENCE = "my_app";
 
 const { Client } = pg;
-
+const app = express();
 const jwksClientInstance = jwksClient({
   jwksUri: "http://auth:3000/.well-known/jwks.json",
   requestHeaders: {},
   timeout: 10000,
   cache: true,
 });
+const healthcheck = new health.HealthChecker();
 
-const app = express();
-const DATABASE_URL = process.env.DATABASE_URL || "postgres://root:password@postgres:5432/db";
-const AUDIENCE = "my_app";
-
-// validate JWTs
 app.use("/graphql", async (req, res, next) => {
-  const token = req.headers.authorization.replace("Bearer ", "");
-  const key = await jwksClientInstance.getSigningKey();
+  const { authorization } = req.headers;
   try {
+    if (!authorization) {
+      throw new Error("no authorization header");
+    }
+
+    if (!authorization.includes("Bearer")) {
+      throw new Error("authorization header does not contain bearer token");
+    }
+
+    const token = authorization.replace("Bearer ", "");
+    const key = await jwksClientInstance.getSigningKey();
     const decoded = jwt.verify(
       token,
       key.getPublicKey(),
@@ -31,12 +40,11 @@ app.use("/graphql", async (req, res, next) => {
     const { sub, role } = decoded;
     req.user = { sub, role };
   } catch (err) {
-    return res.status(401).json({ err });
+    return res.status(401).json({ err: err.message });
   }
   return next();
 });
 
-// postgraphile
 app.use(
   postgraphile(
     DATABASE_URL,
@@ -52,6 +60,7 @@ app.use(
         const settings = {};
         if (req.user) {
           settings.role = req.user.role;
+          settings.sub = req.user.sub;
         }
         return settings;
       },
@@ -59,32 +68,21 @@ app.use(
   ),
 );
 
-const ready = async () => {
+healthcheck.registerLivenessCheck(async (resolve, _reject) => {
   try {
     const client = new Client(DATABASE_URL);
     await client.connect();
     await client.query("SELECT NOW()").catch(() => false);
     await client.end();
-  } catch (err) {
-    return false;
+    resolve();
+  } catch {
+    _reject();
   }
-  return true;
-};
-
-app.get("/live", (req, res) => res.status(200).json({ status: "OK" }));
-
-app.get("/ready", async (req, res) => {
-  if (!(await ready())) {
-    return res.status(500).json({ status: "NOT OK" });
-  }
-  return res.status(200).json({ status: "OK" });
 });
+healthcheck.registerReadinessCheck(new health.PingCheck("example.com"));
 
-app.get("/health", async (req, res) => {
-  if (!(await ready())) {
-    return res.status(500).json({ status: "NOT OK" });
-  }
-  return res.status(200).json({ status: "OK" });
-});
+app.use("/live", health.LivenessEndpoint(healthcheck));
+app.use("/ready", health.ReadinessEndpoint(healthcheck));
+app.use("/health", health.HealthEndpoint(healthcheck));
 
 app.listen(process.env.PORT || 3000);
